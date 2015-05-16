@@ -1,0 +1,38 @@
+try {
+			// 创建链接
+			SOAPConnectionFactory soapConnectionFactory = SOAPConnectionFactory.newInstance();
+			SOAPConnection connection = soapConnectionFactory.createConnection();
+			// 创建消息对象
+			MessageFactory messageFactory = MessageFactory.newInstance();
+			SOAPMessage message = messageFactory.createMessage();
+			SOAPPart soapPart = message.getSOAPPart();// 创建soap部分
+			SOAPEnvelope envelope = soapPart.getEnvelope();
+			envelope.setPrefix("soap");
+			// 创建消息头/主体
+			SOAPHeader soapHeader = envelope.getHeader();
+			soapHeader.setPrefix("soap");
+			SOAPBody soapBody = envelope.getBody();
+			soapBody.setPrefix("soap");
+			QName ccniitSoapHeaderQName = new QName("http://tempuri.org", "CcniitSoapHeader");
+			SOAPElement ccniitSoapHeaderElement = soapHeader.addChildElement(ccniitSoapHeaderQName);
+			SOAPElement userIDElement = ccniitSoapHeaderElement.addChildElement("UserID");
+			userIDElement.addTextNode("12310320304");
+			SOAPElement userIPElement = ccniitSoapHeaderElement.addChildElement("UserIP");
+			userIPElement.addTextNode("169.254.92.24,10.97.34.26,192.168.160.1,192.168.242.1");
+			SOAPElement tokenElement = ccniitSoapHeaderElement.addChildElement("Token");
+			tokenElement.addTextNode("9CF828622B370AC8E9CF06D74A954ADC");
+			QName keepSessionQName = new QName("http://tempuri.org","KeepSession");
+			SOAPElement keepSessionElement = soapBody.addChildElement(keepSessionQName);
+//			message.writeTo(System.out);
+			message.saveChanges();
+			URL url = new URL("http://100.0.0.10/NSUAAAWS/Default.asmx");
+			SOAPMessage replyMessage = connection.call(message,url);
+			replyMessage.writeTo(System.out);
+			connection.close();
+		} catch (UnsupportedOperationException | SOAPException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
