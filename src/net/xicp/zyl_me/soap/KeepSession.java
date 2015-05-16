@@ -25,12 +25,22 @@ import org.dom4j.Element;
 public class KeepSession {
 	private KeepSessionRequest keepSessionData;
 	public static final int EXCEPTION_OCCURED = 12345;
+
 	public KeepSession(KeepSessionRequest keepSessionRequest) {
 		super();
 		this.keepSessionData = keepSessionRequest;
 	}
 
 	private boolean isFirstTimeToLogin = true;
+	private String loginStatus = "non-login";
+
+	public String getLoginStatus() {
+		return loginStatus;
+	}
+
+	public void setLoginStatus(String loginStatus) {
+		this.loginStatus = loginStatus;
+	}
 
 	interface OnResponseListener {
 		public void onResponse(KeepSessionResponse response);
@@ -38,43 +48,49 @@ public class KeepSession {
 
 	public void keepSession(final OnResponseListener onRespnseListener) throws UnsupportedEncodingException, IOException {
 		final String messageStub = InputStreamUtil.getString("xml/login.xml");
-		Timer timer = new Timer();
+		loginStatus = "login";
+		final Timer timer = new Timer();
 		timer.schedule(new TimerTask() {
 			@Override
 			public void run() {
 				// TODO Auto-generated method stub
-				try {
-					String message = messageStub;
-					if (isFirstTimeToLogin) {
-						keepSessionData.setToken(EncyptUtil.encyptMD5(keepSessionData.getToken()));
-						keepSessionData.setToken(EncyptUtil.encyptMD5(keepSessionData.getToken()));
-					} else {
-						keepSessionData.setToken(EncyptUtil.encyptMD5(keepSessionData.getToken()));
+				if (loginStatus.equals("login")) {
+					try {
+						String message = messageStub;
+						if (isFirstTimeToLogin) {
+							keepSessionData.setToken(EncyptUtil.encyptMD5(keepSessionData.getToken()));
+							keepSessionData.setToken(EncyptUtil.encyptMD5(keepSessionData.getToken()));
+						} else {
+							keepSessionData.setToken(EncyptUtil.encyptMD5(keepSessionData.getToken()));
+						}
+						message = message.replace("~UserID~", keepSessionData.getUserID());
+						message = message.replace("~UserIP~", keepSessionData.getUserIP());
+						message = message.replace("~Token~", keepSessionData.getToken());
+						Response response = SOAPRequestUtil.request(SOAPRequestUtil.RequestAction.keepSession, message);
+						KeepSessionResponse keepSessionResponse = parseKeepSessionResponse(response);
+						onRespnseListener.onResponse(keepSessionResponse);
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+						KeepSessionResponse errorResponse = new KeepSessionResponse();
+						errorResponse.setResponse(new Response(EXCEPTION_OCCURED, e.getMessage()));
+						onRespnseListener.onResponse(errorResponse);
+					} catch (NoSuchAlgorithmException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+						KeepSessionResponse errorResponse = new KeepSessionResponse();
+						errorResponse.setResponse(new Response(EXCEPTION_OCCURED, e.getMessage()));
+						onRespnseListener.onResponse(errorResponse);
+					} catch (DocumentException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+						KeepSessionResponse errorResponse = new KeepSessionResponse();
+						errorResponse.setResponse(new Response(EXCEPTION_OCCURED, e.getMessage()));
+						onRespnseListener.onResponse(errorResponse);
 					}
-					message = message.replace("~UserID~", keepSessionData.getUserID());
-					message = message.replace("~UserIP~", keepSessionData.getUserIP());
-					message = message.replace("~Token~", keepSessionData.getToken());
-					Response response = SOAPRequestUtil.request(SOAPRequestUtil.RequestAction.keepSession, message);
-					KeepSessionResponse keepSessionResponse = parseKeepSessionResponse(response);
-					onRespnseListener.onResponse(keepSessionResponse);
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-					KeepSessionResponse errorResponse = new KeepSessionResponse();
-					errorResponse.setResponse(new Response(EXCEPTION_OCCURED, e.getMessage()));
-					onRespnseListener.onResponse(errorResponse);
-				} catch (NoSuchAlgorithmException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-					KeepSessionResponse errorResponse = new KeepSessionResponse();
-					errorResponse.setResponse(new Response(EXCEPTION_OCCURED, e.getMessage()));
-					onRespnseListener.onResponse(errorResponse);
-				} catch (DocumentException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-					KeepSessionResponse errorResponse = new KeepSessionResponse();
-					errorResponse.setResponse(new Response(EXCEPTION_OCCURED, e.getMessage()));
-					onRespnseListener.onResponse(errorResponse);
+				}else
+				{
+					timer.cancel();
 				}
 			}
 		}, 10000, 20000);

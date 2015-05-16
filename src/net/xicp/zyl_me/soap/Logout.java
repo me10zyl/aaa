@@ -20,7 +20,7 @@ import org.dom4j.DocumentHelper;
 import org.dom4j.Element;
 
 public class Logout {
-	private LogoutRequest logoutRequest = new LogoutRequest();
+	private LogoutRequest logoutRequest;
 
 	public Logout(LogoutRequest logoutRequest) {
 		super();

@@ -11,6 +11,7 @@ import java.security.spec.InvalidKeySpecException;
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
+import javax.swing.JOptionPane;
 
 import org.dom4j.DocumentException;
 
@@ -18,11 +19,14 @@ import net.xicp.zyl_me.entity.KeepSessionRequest;
 import net.xicp.zyl_me.entity.KeepSessionResponse;
 import net.xicp.zyl_me.entity.LoginRequest;
 import net.xicp.zyl_me.entity.LoginResponse;
+import net.xicp.zyl_me.entity.LogoutRequest;
+import net.xicp.zyl_me.entity.LogoutResponse;
 import net.xicp.zyl_me.entity.Response;
 import net.xicp.zyl_me.exception.DisableException;
 import net.xicp.zyl_me.exception.ExpireException;
 import net.xicp.zyl_me.exception.HTTPNotOKException;
 import net.xicp.zyl_me.exception.IDPWWrongException;
+import net.xicp.zyl_me.exception.LogoutFailedException;
 import net.xicp.zyl_me.soap.KeepSession.OnResponseListener;
 import net.xicp.zyl_me.util.EncyptUtil;
 
@@ -36,6 +40,7 @@ public class Client {
 	}
 
 	private LoginRequest loginRequest;
+	private LogoutRequest logoutRequest;
 	private String userID = "";
 	private String userPW = "";
 	private String userIP = "";
@@ -45,10 +50,11 @@ public class Client {
 	private String isAutoLogin = "false";
 	private String clientVersion = "1.14.10.16";
 	private String osVersion = "Microsoft Windows NT 6.1.7601 Service Pack 1";
-
+	private String token;
 	OnNewPublicMessageReceivedListener onNewPublicMessageReceivedListener;
 
 	OnNewUserMessageReceivedListener onNewUserMessageReceivedListener;
+	private KeepSession keepSession;
 
 	public String getClientVersion() {
 		return clientVersion;
@@ -87,6 +93,31 @@ public class Client {
 		return userPW;
 	}
 
+	public String logout() throws NoSuchAlgorithmException, DocumentException, IOException, HTTPNotOKException, LogoutFailedException
+	{
+		String message = "";
+		keepSession.setLoginStatus("logout");
+		token = EncyptUtil.encyptMD5(token);
+		logoutRequest = new LogoutRequest(userID,userIP,token);
+		Logout logout = new Logout(logoutRequest);
+		LogoutResponse logoutResponse = logout.logout();
+		if(logoutResponse.getResponse().getResponseCode() == HttpURLConnection.HTTP_OK)
+		{
+			if("true".equals(logoutResponse.getLogoutResult()))
+			{
+				System.out.println("注销成功!");
+				message += "注销成功!";
+			}else
+			{
+				throw new LogoutFailedException("注销失败！");
+			}
+		}else
+		{
+			throw new HTTPNotOKException("注销失败！");
+		}
+		return message;
+	}
+
 	public void setClientVersion(String clientVersion) {
 		this.clientVersion = clientVersion;
 	}
@@ -110,13 +141,13 @@ public class Client {
 	public void setOnNewPublicMessageReceivedListener(OnNewPublicMessageReceivedListener onNewPublicMessageReceivedListener) {
 		this.onNewPublicMessageReceivedListener = onNewPublicMessageReceivedListener;
 	}
-
 	public void setOnNewUserMessageReceivedListener(OnNewUserMessageReceivedListener onNewUserMessageReceivedListener) {
 		this.onNewUserMessageReceivedListener = onNewUserMessageReceivedListener;
 	}
 	public void setOsVersion(String osVersion) {
 		this.osVersion = osVersion;
 	}
+
 	public void setUserID(String userID) {
 		this.userID = userID;
 	}
@@ -128,12 +159,11 @@ public class Client {
 	public void setUserPW(String userPW) throws InvalidKeyException, NoSuchAlgorithmException, UnsupportedEncodingException, InvalidKeySpecException, InvalidAlgorithmParameterException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException {
 		this.userPW = EncyptUtil.encyptPassword(userID, userPW);
 	}
-
+	
 	public String work() throws UnsupportedEncodingException, DocumentException, IOException, IDPWWrongException, ExpireException, HTTPNotOKException, DisableException {
 		String message = "";
 		loginRequest = new LoginRequest(errInfo, userID, userPW, userIP, computerName, mac, isAutoLogin, clientVersion, osVersion);
 		Login login = new Login(loginRequest);
-		KeepSession keepSession = null;
 		LoginResponse loginResponse = login.login();
 		int responseCode = loginResponse.getResponse().getResponseCode();
 		if (responseCode == HttpURLConnection.HTTP_OK) {
@@ -146,7 +176,7 @@ public class Client {
 			} else if ("true".equals(loginResponse.getIsDisable())) {
 				throw new DisableException("什么鬼, 账户被禁用了");
 			}
-			String token = loginResponse.getToken();
+			token = loginResponse.getToken();
 			if ("true".equals(loginResponse.getIsLogin())) {
 				System.out.println("登陆成功!!");
 				message += "登陆成功!\n账户可用日期为 " + loginResponse.getExpireTime() + "\n宽带组：" + loginResponse.getNetGroup();
@@ -178,6 +208,10 @@ public class Client {
 									onNewUserMessageReceivedListener.onMessageReceived(keepSessionResponse.getNewUserMessage());
 								}
 							}
+						}else
+						{
+							System.out.println("居然不是200 OK?!连接服务器超时");
+							JOptionPane.showMessageDialog(null, "居然不是200 OK?!连接服务器超时");
 						}
 						System.out.println(response.toString());
 					}
@@ -186,8 +220,9 @@ public class Client {
 		} else {
 			System.out.println("居然不是200 OK?!");
 			System.out.println(loginResponse.getResponse());
-			throw new HTTPNotOKException("居然不是200 OK?!");
+			throw new HTTPNotOKException("居然不是200 OK?!登陆失败");
 		}
 		return message;
 	}
+	
 }

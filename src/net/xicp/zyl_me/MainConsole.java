@@ -1,6 +1,8 @@
 package net.xicp.zyl_me;
 
 import java.io.IOException;
+import java.net.SocketException;
+import java.net.UnknownHostException;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
@@ -17,6 +19,7 @@ import net.xicp.zyl_me.exception.IDPWWrongException;
 import net.xicp.zyl_me.soap.Client;
 import net.xicp.zyl_me.soap.Client.OnNewPublicMessageReceivedListener;
 import net.xicp.zyl_me.soap.Client.OnNewUserMessageReceivedListener;
+import net.xicp.zyl_me.util.SystemUtil;
 
 import org.dom4j.DocumentException;
 
@@ -35,14 +38,18 @@ public class MainConsole {
 		// TODO Auto-generated constructor stub
 	}
 
-	public static void main(String[] args) throws DocumentException {
+	public static void main(String[] args) {
 		try {
+			computerName = SystemUtil.getComputerName();
+			userIP = SystemUtil.getIPAddress();
+			mac = SystemUtil.getMACAddress();
 			Client client = new Client();
 			client.setClientVersion(clientVersion);
 			client.setOsVersion(osVersion);
 			client.setComputerName(computerName);
 			client.setErrInfo(errInfo);
 			client.setIsAutoLogin(isAutoLogin);
+			
 			client.setMac(mac);
 			client.setUserID(userID);
 			client.setUserIP(userIP);
@@ -62,7 +69,7 @@ public class MainConsole {
 				}
 			});
 			client.work();
-		} catch (InvalidKeyException | NoSuchAlgorithmException | InvalidKeySpecException | InvalidAlgorithmParameterException | NoSuchPaddingException | IllegalBlockSizeException | BadPaddingException | IOException | IDPWWrongException | ExpireException | HTTPNotOKException | DisableException e) {
+		} catch (InvalidKeyException | NoSuchAlgorithmException | InvalidKeySpecException | InvalidAlgorithmParameterException | NoSuchPaddingException | IllegalBlockSizeException | BadPaddingException | IOException | IDPWWrongException | ExpireException | HTTPNotOKException | DisableException | DocumentException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}

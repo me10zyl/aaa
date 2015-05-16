@@ -5,6 +5,13 @@ public class LogoutRequest {
 	private String userIP;
 	private String token;
 
+	public LogoutRequest(String userID, String userIP, String token) {
+		super();
+		this.userID = userID;
+		this.userIP = userIP;
+		this.token = token;
+	}
+
 	public String getUserID() {
 		return userID;
 	}
