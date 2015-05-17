@@ -38,7 +38,17 @@ public class Client {
 	public interface OnNewUserMessageReceivedListener {
 		public void onMessageReceived(String message);
 	}
-
+	
+	public interface OnErrorListener{
+		public void onError(String message);
+	}
+	
+	public interface OnLogoutSuccessListener{
+		public void onLogout(String message);
+	}
+	
+	private String publicMessageID = "";
+	private String userMessageID = "";
 	private LoginRequest loginRequest;
 	private LogoutRequest logoutRequest;
 	private String userID = "";
@@ -51,10 +61,47 @@ public class Client {
 	private String clientVersion = "1.14.10.16";
 	private String osVersion = "Microsoft Windows NT 6.1.7601 Service Pack 1";
 	private String token;
+	private String loginStatus = "non-login";
+	public String getLoginStatus() {
+		return loginStatus;
+	}
+
+	public void setLoginStatus(String loginStatus) {
+		this.loginStatus = loginStatus;
+	}
+
 	OnNewPublicMessageReceivedListener onNewPublicMessageReceivedListener;
 
 	OnNewUserMessageReceivedListener onNewUserMessageReceivedListener;
+	
+	OnErrorListener onErrorListener;
+	
+	OnLogoutSuccessListener onLogoutListener;
+	public OnLogoutSuccessListener getOnLogoutSucessListener() {
+		return onLogoutListener;
+	}
+
+	public void setOnLogoutSuccessListener(OnLogoutSuccessListener onLogoutListener) {
+		this.onLogoutListener = onLogoutListener;
+	}
+
+	public OnErrorListener getOnErrorListener() {
+		return onErrorListener;
+	}
+
+	public void setOnErrorListener(OnErrorListener onErrorListener) {
+		this.onErrorListener = onErrorListener;
+	}
+
 	private KeepSession keepSession;
+
+	public KeepSession getKeepSession() {
+		return keepSession;
+	}
+
+	public void setKeepSession(KeepSession keepSession) {
+		this.keepSession = keepSession;
+	}
 
 	public String getClientVersion() {
 		return clientVersion;
@@ -95,9 +142,9 @@ public class Client {
 
 	public String logout() throws NoSuchAlgorithmException, DocumentException, IOException, HTTPNotOKException, LogoutFailedException
 	{
+		System.out.println("注销中...");
 		String message = "";
-		keepSession.setLoginStatus("logout");
-		token = EncyptUtil.encyptMD5(token);
+		cancelKeepSession("logout");
 		logoutRequest = new LogoutRequest(userID,userIP,token);
 		Logout logout = new Logout(logoutRequest);
 		LogoutResponse logoutResponse = logout.logout();
@@ -107,9 +154,11 @@ public class Client {
 			{
 				System.out.println("注销成功!");
 				message += "注销成功!";
+				onLogoutListener.onLogout(message);
 			}else
 			{
-				throw new LogoutFailedException("注销失败！");
+				cancelKeepSession("logoutFailed");
+				throw new LogoutFailedException("注销失败" + (logoutResponse.getErrorInfo() != null ? ":"+logoutResponse.getErrorInfo() : ""));
 			}
 		}else
 		{
@@ -160,7 +209,7 @@ public class Client {
 		this.userPW = EncyptUtil.encyptPassword(userID, userPW);
 	}
 	
-	public String work() throws UnsupportedEncodingException, DocumentException, IOException, IDPWWrongException, ExpireException, HTTPNotOKException, DisableException {
+	public String work() throws UnsupportedEncodingException, DocumentException, IOException, IDPWWrongException, ExpireException, HTTPNotOKException, DisableException, NoSuchAlgorithmException {
 		String message = "";
 		loginRequest = new LoginRequest(errInfo, userID, userPW, userIP, computerName, mac, isAutoLogin, clientVersion, osVersion);
 		Login login = new Login(loginRequest);
@@ -168,18 +217,24 @@ public class Client {
 		int responseCode = loginResponse.getResponse().getResponseCode();
 		if (responseCode == HttpURLConnection.HTTP_OK) {
 			if ("true".equals(loginResponse.getIsIPInvalid())) {
+				loginStatus = "login-failed";
 				throw new IDPWWrongException("ip无效");
 			} else if ("true".equals(loginResponse.getIsIDPWWrong())) {
+				loginStatus = "login-failed";
 				throw new IDPWWrongException("用户名或密码错误");
 			} else if ("true".equals(loginResponse.getIsExpire())) {
+				loginStatus = "login-failed";
 				throw new ExpireException("用户已过期");
 			} else if ("true".equals(loginResponse.getIsDisable())) {
+				loginStatus = "login-failed";
 				throw new DisableException("什么鬼, 账户被禁用了");
 			}
-			token = loginResponse.getToken();
 			if ("true".equals(loginResponse.getIsLogin())) {
+				loginStatus = "login";
 				System.out.println("登陆成功!!");
-				message += "登陆成功!\n账户可用日期为 " + loginResponse.getExpireTime() + "\n宽带组：" + loginResponse.getNetGroup();
+				message += "登陆成功!\n账户可用日期为:\n" + loginResponse.getExpireTime() + "\n宽带组：" + loginResponse.getNetGroup();
+				token = loginResponse.getToken();
+				token = EncyptUtil.encyptMD5(token);
 				keepSession = new KeepSession(new KeepSessionRequest(userID, userIP, token));
 				keepSession.keepSession(new OnResponseListener() {
 					@Override
@@ -187,42 +242,57 @@ public class Client {
 						// TODO Auto-generated method stub
 						Response response = keepSessionResponse.getResponse();
 						if (response.getResponseCode() == KeepSession.EXCEPTION_OCCURED) {
+							loginStatus = "keepSession-failed";
 							System.out.println("发生了错误！");
 							System.out.println(response.getResponseString());
 						} else if (response.getResponseCode() == HttpURLConnection.HTTP_OK) {
 							System.out.println("KeepSession HTTP OK!");
 							if ("true".equals(keepSessionResponse.getKeepSessionResult())) {
 								System.out.println("保持会话成功...");
+							}else
+							{//TODO keepSession failed
+								System.out.println("保持会话失败...");
+								cancelKeepSession("keepSessionFailed");
+								onErrorListener.onError("你已断开连接"+ (keepSessionResponse.getErrorInfo() != null ? ":" + keepSessionResponse.getErrorInfo() : ""));
 							}
-							if (keepSessionResponse.getNewPublicMessage() != null && !"".equals(keepSessionResponse.getNewPublicMessage())) {
+							if (keepSessionResponse.getNewPublicMessage() != null && !"".equals(keepSessionResponse.getNewPublicMessage()) && !keepSessionResponse.getNewPublicMessage().startsWith(publicMessageID)) {
+								publicMessageID = keepSessionResponse.getNewPublicMessage().split("|")[0];
 								System.out.println("你有新的公共消息...");
 								System.out.println(keepSessionResponse.getNewPublicMessage());
 								if (onNewPublicMessageReceivedListener != null) {
-									onNewPublicMessageReceivedListener.onMessageReceived(keepSessionResponse.getNewPublicMessage());
+									onNewPublicMessageReceivedListener.onMessageReceived(keepSessionResponse.getNewPublicMessage().split("|")[keepSessionResponse.getNewPublicMessage().length() - 1]);
 								}
 							}
-							if (keepSessionResponse.getNewUserMessage() != null && !"".equals(keepSessionResponse.getNewUserMessage())) {
+							if (keepSessionResponse.getNewUserMessage() != null && !"".equals(keepSessionResponse.getNewUserMessage()) && !keepSessionResponse.getNewUserMessage().startsWith(userMessageID)) {
+								userMessageID = keepSessionResponse.getNewUserMessage().split("|")[0];
 								System.out.println("你有新的用户消息...");
 								System.out.println(keepSessionResponse.getNewUserMessage());
 								if (onNewUserMessageReceivedListener != null) {
-									onNewUserMessageReceivedListener.onMessageReceived(keepSessionResponse.getNewUserMessage());
+									onNewUserMessageReceivedListener.onMessageReceived(keepSessionResponse.getNewUserMessage().split("|")[keepSessionResponse.getNewUserMessage().length() - 1]);
 								}
 							}
 						}else
 						{
+							loginStatus = "keepSession-failed";
 							System.out.println("居然不是200 OK?!连接服务器超时");
-							JOptionPane.showMessageDialog(null, "居然不是200 OK?!连接服务器超时");
+							onErrorListener.onError("居然不是200 OK?!连接服务器超时");
 						}
 						System.out.println(response.toString());
 					}
 				});
 			}
 		} else {
+			loginStatus = "login-failed";
 			System.out.println("居然不是200 OK?!");
 			System.out.println(loginResponse.getResponse());
 			throw new HTTPNotOKException("居然不是200 OK?!登陆失败");
 		}
 		return message;
+	}
+	
+	public void cancelKeepSession(String newLoginStatus) {
+		keepSession.cancel();
+		loginStatus = newLoginStatus;
 	}
 	
 }

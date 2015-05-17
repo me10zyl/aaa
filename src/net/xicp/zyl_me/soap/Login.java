@@ -26,33 +26,33 @@ import net.xicp.zyl_me.util.InputStreamUtil;
 import net.xicp.zyl_me.util.SOAPRequestUtil;
 
 public class Login {
-	private LoginRequest loginData = new LoginRequest();
+	private LoginRequest loginRequest = new LoginRequest();
 
-	public Login(LoginRequest loginData) {
+	public Login(LoginRequest loginRequest) {
 		super();
-		this.loginData.setErrInfo(loginData.getErrInfo());
-		this.loginData.setUserID(loginData.getUserID());
-		this.loginData.setUserPW(loginData.getUserPW());
-		this.loginData.setUserIP(loginData.getUserIP());
-		this.loginData.setComputerName(loginData.getComputerName());
-		this.loginData.setMac(loginData.getMac());
-		this.loginData.setIsAutoLogin(loginData.getIsAutoLogin());
-		this.loginData.setClientVersion(loginData.getClientVersion());
-		this.loginData.setOsVersion(loginData.getOsVersion());
+		this.loginRequest.setErrInfo(loginRequest.getErrInfo());
+		this.loginRequest.setUserID(loginRequest.getUserID());
+		this.loginRequest.setUserPW(loginRequest.getUserPW());
+		this.loginRequest.setUserIP(loginRequest.getUserIP());
+		this.loginRequest.setComputerName(loginRequest.getComputerName());
+		this.loginRequest.setMac(loginRequest.getMac());
+		this.loginRequest.setIsAutoLogin(loginRequest.getIsAutoLogin());
+		this.loginRequest.setClientVersion(loginRequest.getClientVersion());
+		this.loginRequest.setOsVersion(loginRequest.getOsVersion());
 	}
 
 	private Response login_() throws UnsupportedEncodingException, IOException {
 		Response response = null;
 		String message = InputStreamUtil.getString("xml/login.xml");
-		message = message.replace("~ErrInfo~", loginData.getErrInfo());
-		message = message.replace("~UserID~", loginData.getUserID());
-		message = message.replace("~UserPW~", loginData.getUserPW());
-		message = message.replace("~UserIP~", loginData.getUserIP());
-		message = message.replace("~ComputerName~", loginData.getComputerName());
-		message = message.replace("~MAC~", loginData.getMac());
-		message = message.replace("~IsAutoLogin~", loginData.getIsAutoLogin());
-		message = message.replace("~ClientVersion~", loginData.getClientVersion());
-		message = message.replace("~OSVersion~", loginData.getOsVersion());
+		message = message.replace("~ErrInfo~", loginRequest.getErrInfo());
+		message = message.replace("~UserID~", loginRequest.getUserID());
+		message = message.replace("~UserPW~", loginRequest.getUserPW());
+		message = message.replace("~UserIP~", loginRequest.getUserIP());
+		message = message.replace("~ComputerName~", loginRequest.getComputerName());
+		message = message.replace("~MAC~", loginRequest.getMac());
+		message = message.replace("~IsAutoLogin~", loginRequest.getIsAutoLogin());
+		message = message.replace("~ClientVersion~", loginRequest.getClientVersion());
+		message = message.replace("~OSVersion~", loginRequest.getOsVersion());
 		response = SOAPRequestUtil.request(SOAPRequestUtil.RequestAction.login, message);
 		return response;
 	}

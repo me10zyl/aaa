@@ -3,7 +3,16 @@ package net.xicp.zyl_me.entity;
 public class LogoutResponse {
 	private String logoutResult;
 	private Response response;
+	private String errorInfo;
 	
+	public String getErrorInfo() {
+		return errorInfo;
+	}
+
+	public void setErrorInfo(String errorInfo) {
+		this.errorInfo = errorInfo;
+	}
+
 	public Response getResponse() {
 		return response;
 	}
@@ -20,9 +29,10 @@ public class LogoutResponse {
 		return logoutResult;
 	}
 
-	public LogoutResponse(String logoutResult, Response response) {
+	public LogoutResponse(String logoutResult, Response response,String errorInfo) {
 		this.logoutResult = logoutResult;
 		this.response = response;
+		this.errorInfo = errorInfo;
 	}
 
 	public LogoutResponse() {

@@ -1,24 +1,33 @@
 package net.xicp.zyl_me.entity;
 
 public class KeepSessionResponse {
-	private String KeepSessionResult;
+	private String keepSessionResult;
 	private String newPublicMessage;
 	private String newUserMessage;
+	private String errorInfo;
+	public String getErrorInfo() {
+		return errorInfo;
+	}
+
+	public void setErrorInfo(String errorInfo) {
+		this.errorInfo = errorInfo;
+	}
 	private Response response;
 	public KeepSessionResponse() {
 		// TODO Auto-generated constructor stub
 	}
 	
-	public KeepSessionResponse(String keepSessionResult, String newPublicMessage, String newUserMessage, Response response) {
+	public KeepSessionResponse(String keepSessionResult, String newPublicMessage, String newUserMessage, Response response,String errorInfo) {
 		super();
-		KeepSessionResult = keepSessionResult;
+		this.keepSessionResult = keepSessionResult;
 		this.newPublicMessage = newPublicMessage;
 		this.newUserMessage = newUserMessage;
 		this.response = response;
+		this.errorInfo = errorInfo;
 	}
 
 	public String getKeepSessionResult() {
-		return KeepSessionResult;
+		return keepSessionResult;
 	}
 	public String getNewPublicMessage() {
 		return newPublicMessage;
@@ -30,7 +39,7 @@ public class KeepSessionResponse {
 		return response;
 	}
 	public void setKeepSessionResult(String keepSessionResult) {
-		KeepSessionResult = keepSessionResult;
+		this.keepSessionResult = keepSessionResult;
 	}
 	public void setNewPublicMessage(String newPublicMessage) {
 		this.newPublicMessage = newPublicMessage;

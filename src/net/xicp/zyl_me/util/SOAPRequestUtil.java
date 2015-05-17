@@ -3,8 +3,11 @@ package net.xicp.zyl_me.util;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.PrintWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
+
+import javax.swing.JOptionPane;
 
 import net.xicp.zyl_me.entity.Response;
 
@@ -13,7 +16,7 @@ public class SOAPRequestUtil {
 		login, keepSession, logout
 	}
 
-	public static Response request(RequestAction action, String message) throws IOException {
+	public static Response request(RequestAction action, String message) {
 		Response response = null;
 		HttpURLConnection connection = null;
 		OutputStream os = null;
@@ -35,25 +38,39 @@ public class SOAPRequestUtil {
 			default:
 				throw new RuntimeException("请传入requestAction!");
 			}
-			connection.setRequestMethod("POST");
-			connection.setDoOutput(true);
 			connection.setRequestProperty("User-Agent", "Mozilla/4.0 (compatible; MSIE 6.0; MS Web Services Client Protocol 4.0.30319.18408)");
-			connection.setRequestProperty("Pragma", null);
-			connection.setRequestProperty("Expect", "100-Continue");
+			connection.addRequestProperty("Expect", "100-Continue");
+			connection.setRequestProperty("Content-Type", "text/xml; charset=utf-8");
+			connection.setRequestMethod("POST");
+			connection.setConnectTimeout(5000);
+			connection.setDoOutput(true);
+			connection.setDoInput(true);
 			os = connection.getOutputStream();
 			os.write(message.getBytes());
+			os.flush();
 			is = connection.getInputStream();
-			responseCode = connection.getResponseCode();
 			responseStr = InputStreamUtil.getString(is);
+			responseCode = connection.getResponseCode();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
+			JOptionPane.showMessageDialog(null, "无法连接到服务器");
 			e.printStackTrace();
 		} finally {
 			if (os != null) {
-				os.close();
+				try {
+					os.close();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 			}
 			if (is != null) {
-				is.close();
+				try {
+					is.close();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 			}
 		}
 		response = new Response(responseCode, responseStr);

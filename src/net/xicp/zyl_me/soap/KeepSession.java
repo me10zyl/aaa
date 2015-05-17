@@ -31,38 +31,22 @@ public class KeepSession {
 		this.keepSessionData = keepSessionRequest;
 	}
 
-	private boolean isFirstTimeToLogin = true;
-	private String loginStatus = "non-login";
-
-	public String getLoginStatus() {
-		return loginStatus;
-	}
-
-	public void setLoginStatus(String loginStatus) {
-		this.loginStatus = loginStatus;
-	}
+	private Timer timer;
 
 	interface OnResponseListener {
 		public void onResponse(KeepSessionResponse response);
 	};
 
 	public void keepSession(final OnResponseListener onRespnseListener) throws UnsupportedEncodingException, IOException {
-		final String messageStub = InputStreamUtil.getString("xml/login.xml");
-		loginStatus = "login";
-		final Timer timer = new Timer();
+		final String messageStub = InputStreamUtil.getString("xml/keepSession.xml");
+		timer = new Timer();
 		timer.schedule(new TimerTask() {
 			@Override
 			public void run() {
 				// TODO Auto-generated method stub
-				if (loginStatus.equals("login")) {
 					try {
 						String message = messageStub;
-						if (isFirstTimeToLogin) {
-							keepSessionData.setToken(EncyptUtil.encyptMD5(keepSessionData.getToken()));
-							keepSessionData.setToken(EncyptUtil.encyptMD5(keepSessionData.getToken()));
-						} else {
-							keepSessionData.setToken(EncyptUtil.encyptMD5(keepSessionData.getToken()));
-						}
+						keepSessionData.setToken(EncyptUtil.encyptMD5(keepSessionData.getToken()));
 						message = message.replace("~UserID~", keepSessionData.getUserID());
 						message = message.replace("~UserIP~", keepSessionData.getUserIP());
 						message = message.replace("~Token~", keepSessionData.getToken());
@@ -88,16 +72,18 @@ public class KeepSession {
 						errorResponse.setResponse(new Response(EXCEPTION_OCCURED, e.getMessage()));
 						onRespnseListener.onResponse(errorResponse);
 					}
-				}else
-				{
-					timer.cancel();
 				}
-			}
-		}, 10000, 20000);
+		}, 10000, 10000);
+	}
+	
+	public void cancel()
+	{
+		if(timer != null)
+			timer.cancel();
 	}
 
 	private KeepSessionResponse parseKeepSessionResponse(Response response) throws DocumentException {
-		Map<String, String> maps = new HashMap();
+		Map<String, String> maps = new HashMap<String, String>();
 		Document document = DocumentHelper.parseText(response.toString());
 		Element root = document.getRootElement();
 		Element target = root.element("Body").element("KeepSessionResponse");
@@ -109,6 +95,7 @@ public class KeepSession {
 		keepSessionResponse.setNewPublicMessage((String) maps.get("NewPublicMessage"));
 		keepSessionResponse.setNewUserMessage(((String) maps.get("NewUserMessage")));
 		keepSessionResponse.setKeepSessionResult((String) maps.get("KeepSessionResult"));
+		keepSessionResponse.setErrorInfo((String) maps.get("ErrInfo"));
 		keepSessionResponse.setResponse(response);
 		return keepSessionResponse;
 	}

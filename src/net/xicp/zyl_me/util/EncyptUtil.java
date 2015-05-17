@@ -43,7 +43,6 @@ public class EncyptUtil {
 	public static String encyptPassword(String userID, String password) throws NoSuchAlgorithmException, UnsupportedEncodingException, InvalidKeyException, InvalidKeySpecException, InvalidAlgorithmParameterException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException {
 		String encyptPassword = null;
 		String userIDMD5 = encyptMD5(userID);
-		System.out.println(userIDMD5);
 		String key = userIDMD5.substring(0, 8);
 		DESKeySpec desKeySpec = new DESKeySpec(key.getBytes());
 		AlgorithmParameterSpec algorithmParameterSpec = new IvParameterSpec(key.getBytes());
@@ -52,7 +51,31 @@ public class EncyptUtil {
 		Cipher cipher = Cipher.getInstance("DES/CBC/PKCS5Padding");
 		cipher.init(1, secretKey, algorithmParameterSpec);
 		byte[] bytes = cipher.doFinal(password.getBytes("UTF-8"));
-		encyptPassword = BASE64Encoder.encode(bytes);
+		encyptPassword = BASE64.encode(bytes);
 		return encyptPassword;
+	}
+
+//	public static String decyptPassword(String userID, String password) throws NoSuchAlgorithmException, UnsupportedEncodingException, InvalidKeyException, InvalidKeySpecException, InvalidAlgorithmParameterException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException {
+//		String decyptPassword = null;
+//		String userIDMD5 = encyptMD5(userID);
+//		String key = userIDMD5.substring(0, 8);
+//		DESKeySpec desKeySpec = new DESKeySpec(key.getBytes());
+//		AlgorithmParameterSpec algorithmParameterSpec = new IvParameterSpec(key.getBytes());
+//		SecretKeyFactory secretKeyFactory = SecretKeyFactory.getInstance("DES");
+//		SecretKey secretKey = secretKeyFactory.generateSecret(desKeySpec);
+//		Cipher deCipher = Cipher.getInstance("DES/CBC/PKCS5Padding");
+//		deCipher.init(2, secretKey, algorithmParameterSpec);
+//		byte[] pasByte = deCipher.doFinal(BASE64.decode(password.getBytes()).getBytes());
+//		return new String(pasByte);
+//	}
+	
+	public static String encyptOrDecyptPassword(String password)
+	{
+		char[] charArray = password.toCharArray();
+		for(int i =0 ;i < charArray.length;i ++)
+		{
+			charArray[i] = (char) (charArray[i] ^ 4);
+		}
+		return new String(charArray);
 	}
 }
