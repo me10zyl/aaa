@@ -24,6 +24,7 @@ import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
+import java.text.ParseException;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -54,12 +55,17 @@ import net.xicp.zyl_me.soap.Client.OnErrorListener;
 import net.xicp.zyl_me.soap.Client.OnLogoutSuccessListener;
 import net.xicp.zyl_me.soap.Client.OnNewPublicMessageReceivedListener;
 import net.xicp.zyl_me.soap.Client.OnNewUserMessageReceivedListener;
+import net.xicp.zyl_me.util.ExternalTools;
 import net.xicp.zyl_me.util.Saver;
 import net.xicp.zyl_me.util.SystemUtil;
 import net.xicp.zyl_me.util.VersionAdministrator;
 import net.xicp.zyl_me.util.VersionInfomation;
 
 import org.dom4j.DocumentException;
+
+import javax.swing.JMenuBar;
+import javax.swing.JMenu;
+import javax.swing.JMenuItem;
 
 public class MainUI {
 	private boolean isTheFirstTimeToOpen = true;
@@ -81,6 +87,9 @@ public class MainUI {
 	private JEditorPane noticeEditorPane;
 	private Client client;
 	private JCheckBox savePasswordCheckBox;
+	private JMenu menu_1;
+	private JMenuItem menuItem_1;
+	private JMenuItem menuItem_2;
 
 	/**
 	 * Launch the application.
@@ -217,7 +226,7 @@ public class MainUI {
 	private void initialize() {
 		frame = new JFrame();
 		frame.setIconImage(Toolkit.getDefaultToolkit().getImage(MainUI.class.getResource("/images/icon3.png")));
-		frame.setBounds(100, 100, 557, 261);
+		frame.setBounds(100, 100, 557, 287);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.getContentPane().setLayout(null);
 		client = new Client();
@@ -277,6 +286,47 @@ public class MainUI {
 		frame.setLocationRelativeTo(null);
 		savePasswordCheckBox.setSelected(Saver.getCheckboxStatus("savePasswordCheckBox"));
 		userIDTextField.setText(Saver.getUserID());
+		
+		JMenuBar menuBar = new JMenuBar();
+		frame.setJMenuBar(menuBar);
+		
+		JMenu menu = new JMenu("\u529F\u80FD");
+		menuBar.add(menu);
+		
+		menu_1 = new JMenu("\u5B9A\u65F6\u5173\u673A");
+		menu.add(menu_1);
+		
+		menuItem_1 = new JMenuItem("\u5F00\u542F");
+		menuItem_1.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				String res = (String) JOptionPane.showInputDialog(frame, "请输入关机时间(默认11点关机 格式HH:mm):", "定时关机器", JOptionPane.OK_CANCEL_OPTION,null,null,"23:00");
+				if(res != null)
+				{
+					try {
+						ExternalTools.shutdownAtTime(res);
+					} catch (IOException | ParseException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+						JOptionPane.showMessageDialog(frame, e1.getMessage());
+					}
+				}
+			}
+		});
+		menu_1.add(menuItem_1);
+		
+		menuItem_2 = new JMenuItem("\u5173\u95ED");
+		menuItem_2.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				try {
+					ExternalTools.shutdownCancel();
+				} catch (IOException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+					JOptionPane.showMessageDialog(frame, e1.getMessage());
+				}
+			}
+		});
+		menu_1.add(menuItem_2);
 		if (!"".equals(Saver.getUserID()) && Saver.getUserID() != null && savePasswordCheckBox.isSelected()) {
 			userPWField.setText(Saver.getUserPW());
 		}
