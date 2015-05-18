@@ -15,6 +15,7 @@ import javax.crypto.NoSuchPaddingException;
 
 import net.xicp.zyl_me.entity.LoginRequest;
 import net.xicp.zyl_me.entity.LoginResponse;
+import net.xicp.zyl_me.exception.CannotConnectToServerException;
 import net.xicp.zyl_me.soap.Login;
 import net.xicp.zyl_me.util.EncyptUtil;
 import net.xicp.zyl_me.util.SystemUtil;
@@ -34,7 +35,7 @@ public class LoginTest {
 	private static String clientVersion = "1.14.10.16";
 	private static String osVersion = "Microsoft Windows NT 6.1.7601 Service Pack 1";
 	@Test
-	public void testLogin() throws UnsupportedEncodingException, DocumentException, IOException, InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException, InvalidAlgorithmParameterException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException {
+	public void testLogin() throws UnsupportedEncodingException, DocumentException, IOException, InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException, InvalidAlgorithmParameterException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, CannotConnectToServerException {
 		computerName = SystemUtil.getComputerName();
 		userIP = SystemUtil.getIPAddress();
 		mac = SystemUtil.getMACAddress();

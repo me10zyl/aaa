@@ -45,6 +45,7 @@ import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.border.TitledBorder;
 
+import net.xicp.zyl_me.exception.CannotConnectToServerException;
 import net.xicp.zyl_me.exception.DisableException;
 import net.xicp.zyl_me.exception.ExpireException;
 import net.xicp.zyl_me.exception.HTTPNotOKException;
@@ -172,6 +173,7 @@ public class MainUI {
 				public void onError(String message) {
 					// TODO Auto-generated method stub
 					JOptionPane.showMessageDialog(frame, message);
+					client.cancelKeepSession("error");
 					detectLoginStatus();
 				}
 			});
@@ -200,7 +202,7 @@ public class MainUI {
 					detectVersion();
 				}
 			}, 30000);
-		} catch (InvalidKeyException | NoSuchAlgorithmException | InvalidKeySpecException | InvalidAlgorithmParameterException | NoSuchPaddingException | IllegalBlockSizeException | BadPaddingException | DocumentException | IOException | IDPWWrongException | ExpireException | HTTPNotOKException | DisableException e) {
+		} catch (InvalidKeyException | NoSuchAlgorithmException | InvalidKeySpecException | InvalidAlgorithmParameterException | NoSuchPaddingException | IllegalBlockSizeException | BadPaddingException | DocumentException | IOException | IDPWWrongException | ExpireException | HTTPNotOKException | DisableException | CannotConnectToServerException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 			JOptionPane.showMessageDialog(frame, e.getMessage());
@@ -263,7 +265,7 @@ public class MainUI {
 				{
 					try {
 						noticeEditorPane.setText(client.logout());
-					} catch (NoSuchAlgorithmException | DocumentException | IOException | HTTPNotOKException | LogoutFailedException e1) {
+					} catch (NoSuchAlgorithmException | DocumentException | IOException | HTTPNotOKException | LogoutFailedException | CannotConnectToServerException e1) {
 						// TODO Auto-generated catch block
 						e1.printStackTrace();
 						JOptionPane.showMessageDialog(frame, e1.getMessage());
@@ -347,7 +349,7 @@ public class MainUI {
 					frame.setVisible(false);
 					if(isTheFirstTimeToOpen)
 					{
-						trayicon.displayMessage("NSUAAAC", "me10zyl@qq.com", MessageType.INFO);
+						trayicon.displayMessage("NSUAAAC - Version"+VersionAdministrator.version, "me10zyl@qq.com", MessageType.INFO);
 						isTheFirstTimeToOpen = false;
 					}
 				}

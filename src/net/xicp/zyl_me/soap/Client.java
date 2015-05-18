@@ -22,6 +22,7 @@ import net.xicp.zyl_me.entity.LoginResponse;
 import net.xicp.zyl_me.entity.LogoutRequest;
 import net.xicp.zyl_me.entity.LogoutResponse;
 import net.xicp.zyl_me.entity.Response;
+import net.xicp.zyl_me.exception.CannotConnectToServerException;
 import net.xicp.zyl_me.exception.DisableException;
 import net.xicp.zyl_me.exception.ExpireException;
 import net.xicp.zyl_me.exception.HTTPNotOKException;
@@ -140,7 +141,7 @@ public class Client {
 		return userPW;
 	}
 
-	public String logout() throws NoSuchAlgorithmException, DocumentException, IOException, HTTPNotOKException, LogoutFailedException
+	public String logout() throws NoSuchAlgorithmException, DocumentException, IOException, HTTPNotOKException, LogoutFailedException, CannotConnectToServerException
 	{
 		System.out.println("注销中...");
 		String message = "";
@@ -209,7 +210,7 @@ public class Client {
 		this.userPW = EncyptUtil.encyptPassword(userID, userPW);
 	}
 	
-	public String work() throws UnsupportedEncodingException, DocumentException, IOException, IDPWWrongException, ExpireException, HTTPNotOKException, DisableException, NoSuchAlgorithmException {
+	public String work() throws UnsupportedEncodingException, DocumentException, IOException, IDPWWrongException, ExpireException, HTTPNotOKException, DisableException, NoSuchAlgorithmException, CannotConnectToServerException {
 		String message = "";
 		loginRequest = new LoginRequest(errInfo, userID, userPW, userIP, computerName, mac, isAutoLogin, clientVersion, osVersion);
 		Login login = new Login(loginRequest);
@@ -245,6 +246,7 @@ public class Client {
 							loginStatus = "keepSession-failed";
 							System.out.println("发生了错误！");
 							System.out.println(response.getResponseString());
+							onErrorListener.onError(response.getResponseString());
 						} else if (response.getResponseCode() == HttpURLConnection.HTTP_OK) {
 							System.out.println("KeepSession HTTP OK!");
 							if ("true".equals(keepSessionResponse.getKeepSessionResult())) {

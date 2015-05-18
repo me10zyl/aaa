@@ -13,6 +13,7 @@ import net.xicp.zyl_me.entity.KeepSessionRequest;
 import net.xicp.zyl_me.entity.KeepSessionResponse;
 import net.xicp.zyl_me.entity.KeepSessionResponse;
 import net.xicp.zyl_me.entity.Response;
+import net.xicp.zyl_me.exception.CannotConnectToServerException;
 import net.xicp.zyl_me.util.EncyptUtil;
 import net.xicp.zyl_me.util.InputStreamUtil;
 import net.xicp.zyl_me.util.SOAPRequestUtil;
@@ -66,6 +67,12 @@ public class KeepSession {
 						errorResponse.setResponse(new Response(EXCEPTION_OCCURED, e.getMessage()));
 						onRespnseListener.onResponse(errorResponse);
 					} catch (DocumentException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+						KeepSessionResponse errorResponse = new KeepSessionResponse();
+						errorResponse.setResponse(new Response(EXCEPTION_OCCURED, e.getMessage()));
+						onRespnseListener.onResponse(errorResponse);
+					} catch (CannotConnectToServerException e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
 						KeepSessionResponse errorResponse = new KeepSessionResponse();

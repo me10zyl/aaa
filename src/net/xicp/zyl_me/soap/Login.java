@@ -22,6 +22,7 @@ import org.dom4j.Node;
 import net.xicp.zyl_me.entity.LoginRequest;
 import net.xicp.zyl_me.entity.LoginResponse;
 import net.xicp.zyl_me.entity.Response;
+import net.xicp.zyl_me.exception.CannotConnectToServerException;
 import net.xicp.zyl_me.util.InputStreamUtil;
 import net.xicp.zyl_me.util.SOAPRequestUtil;
 
@@ -41,7 +42,7 @@ public class Login {
 		this.loginRequest.setOsVersion(loginRequest.getOsVersion());
 	}
 
-	private Response login_() throws UnsupportedEncodingException, IOException {
+	private Response login_() throws UnsupportedEncodingException, IOException, CannotConnectToServerException {
 		Response response = null;
 		String message = InputStreamUtil.getString("xml/login.xml");
 		message = message.replace("~ErrInfo~", loginRequest.getErrInfo());
@@ -57,7 +58,7 @@ public class Login {
 		return response;
 	}
 
-	public LoginResponse login() throws DocumentException, UnsupportedEncodingException, IOException {
+	public LoginResponse login() throws DocumentException, UnsupportedEncodingException, IOException, CannotConnectToServerException {
 		Response response = login_();
 		LoginResponse loginResponse = parseLoginResponse(response);
 		return loginResponse;

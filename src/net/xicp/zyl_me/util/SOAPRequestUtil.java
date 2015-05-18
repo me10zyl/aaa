@@ -10,13 +10,14 @@ import java.net.URL;
 import javax.swing.JOptionPane;
 
 import net.xicp.zyl_me.entity.Response;
+import net.xicp.zyl_me.exception.CannotConnectToServerException;
 
 public class SOAPRequestUtil {
 	public enum RequestAction {
 		login, keepSession, logout
 	}
 
-	public static Response request(RequestAction action, String message) {
+	public static Response request(RequestAction action, String message) throws CannotConnectToServerException {
 		Response response = null;
 		HttpURLConnection connection = null;
 		OutputStream os = null;
@@ -53,8 +54,8 @@ public class SOAPRequestUtil {
 			responseCode = connection.getResponseCode();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
-			JOptionPane.showMessageDialog(null, "无法连接到服务器");
 			e.printStackTrace();
+			throw new CannotConnectToServerException("无法连接到服务器");
 		} finally {
 			if (os != null) {
 				try {

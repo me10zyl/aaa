@@ -10,6 +10,7 @@ import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 
+import net.xicp.zyl_me.exception.CannotConnectToServerException;
 import net.xicp.zyl_me.exception.DisableException;
 import net.xicp.zyl_me.exception.ExpireException;
 import net.xicp.zyl_me.exception.HTTPNotOKException;
@@ -35,13 +36,13 @@ public class ClientTest {
 	private static String osVersion = "Microsoft Windows NT 6.1.7601 Service Pack 1";
 
 	@Test
-	public void testLogout() throws NoSuchAlgorithmException, DocumentException, IOException, HTTPNotOKException, LogoutFailedException {
+	public void testLogout() throws NoSuchAlgorithmException, DocumentException, IOException, HTTPNotOKException, LogoutFailedException, CannotConnectToServerException {
 		Client client = new Client();
 		client.logout();
 	}
 
 	@Test
-	public void testWork() {
+	public void testWork() throws CannotConnectToServerException {
 		try {
 			computerName = SystemUtil.getComputerName();
 			userIP = SystemUtil.getIPAddress();

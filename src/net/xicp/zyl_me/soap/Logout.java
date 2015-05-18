@@ -12,6 +12,7 @@ import net.xicp.zyl_me.entity.LoginResponse;
 import net.xicp.zyl_me.entity.LogoutRequest;
 import net.xicp.zyl_me.entity.LogoutResponse;
 import net.xicp.zyl_me.entity.Response;
+import net.xicp.zyl_me.exception.CannotConnectToServerException;
 import net.xicp.zyl_me.util.EncyptUtil;
 import net.xicp.zyl_me.util.InputStreamUtil;
 import net.xicp.zyl_me.util.SOAPRequestUtil;
@@ -29,7 +30,7 @@ public class Logout {
 		this.logoutRequest = logoutRequest;
 	}
 
-	private Response logout_() throws UnsupportedEncodingException, IOException, NoSuchAlgorithmException {
+	private Response logout_() throws UnsupportedEncodingException, IOException, NoSuchAlgorithmException, CannotConnectToServerException {
 		Response response = null;
 		String message = InputStreamUtil.getString("xml/logout.xml");
 		message = message.replace("~UserID~", logoutRequest.getUserID());
@@ -40,7 +41,7 @@ public class Logout {
 		return response;
 	}
 
-	public LogoutResponse logout() throws DocumentException, UnsupportedEncodingException, IOException, NoSuchAlgorithmException {
+	public LogoutResponse logout() throws DocumentException, UnsupportedEncodingException, IOException, NoSuchAlgorithmException, CannotConnectToServerException {
 		Response response = logout_();
 		LogoutResponse logoutResponse = parseLogoutResponse(response);
 		return logoutResponse;
