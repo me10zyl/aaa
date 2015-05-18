@@ -23,7 +23,7 @@ import net.xicp.zyl_me.entity.LogoutRequest;
 import net.xicp.zyl_me.entity.LogoutResponse;
 import net.xicp.zyl_me.entity.MessageReadOKResponse;
 import net.xicp.zyl_me.entity.Response;
-import net.xicp.zyl_me.entity.UserMessageReadOKRequest;
+import net.xicp.zyl_me.entity.MessageReadOKRequest;
 import net.xicp.zyl_me.exception.CannotConnectToServerException;
 import net.xicp.zyl_me.exception.DisableException;
 import net.xicp.zyl_me.exception.ExpireException;
@@ -267,6 +267,17 @@ public class Client {
 								System.out.println(newPublicMessage);
 								if (onNewPublicMessageReceivedListener != null) {
 									onNewPublicMessageReceivedListener.onMessageReceived(strs[strs.length - 1]);
+									MessageReadOK userMessageReadOK = new MessageReadOK(new MessageReadOKRequest(userID, userPW, publicMessageID));
+									try {
+										MessageReadOKResponse messageReadOKResponse = userMessageReadOK.messageReadOK();
+										if("true".equals(messageReadOKResponse.getMessageReadOKResult()))
+										{
+											System.out.println("发送读取公共消息OK成功!");
+										}
+									} catch (NoSuchAlgorithmException | DocumentException | IOException | CannotConnectToServerException e) {
+										// TODO Auto-generated catch block
+										e.printStackTrace();
+									}
 								}
 							}
 							String newUserMessage = keepSessionResponse.getNewUserMessage();
@@ -277,9 +288,9 @@ public class Client {
 								System.out.println(newUserMessage);
 								if (onNewUserMessageReceivedListener != null) {
 									onNewUserMessageReceivedListener.onMessageReceived(strs[strs.length - 1]);
-									UserMessageReadOK userMessageReadOK = new UserMessageReadOK(new UserMessageReadOKRequest(userID, userPW, userMessageID));
+									MessageReadOK userMessageReadOK = new MessageReadOK(new MessageReadOKRequest(userID, userPW, userMessageID));
 									try {
-										MessageReadOKResponse messageReadOKResponse = userMessageReadOK.userMessageReadOK();
+										MessageReadOKResponse messageReadOKResponse = userMessageReadOK.messageReadOK();
 										if("true".equals(messageReadOKResponse.getMessageReadOKResult()))
 										{
 											System.out.println("发送读取用户消息OK成功!");

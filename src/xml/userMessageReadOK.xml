@@ -6,7 +6,7 @@
 			<ErrInfo />
 			<UID>~UserID~</UID>
 			<PW>~UserPW~</PW>
-			<UserMessageID>~UserMessageID~</UserMessageID>
+			<UserMessageID>~MessageID~</UserMessageID>
 		</MessageReadOK>
 	</soap:Body>
 </soap:Envelope>
