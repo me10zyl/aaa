@@ -48,8 +48,8 @@ public class Client {
 		public void onLogout(String message);
 	}
 	
-	private String publicMessageID = "";
-	private String userMessageID = "";
+	private String publicMessageID = null;
+	private String userMessageID = null;
 	private LoginRequest loginRequest;
 	private LogoutRequest logoutRequest;
 	private String userID = "";
@@ -257,20 +257,24 @@ public class Client {
 								cancelKeepSession("keepSessionFailed");
 								onErrorListener.onError("你已断开连接"+ (keepSessionResponse.getErrorInfo() != null ? ":" + keepSessionResponse.getErrorInfo() : ""));
 							}
-							if (keepSessionResponse.getNewPublicMessage() != null && !"".equals(keepSessionResponse.getNewPublicMessage()) && !keepSessionResponse.getNewPublicMessage().startsWith(publicMessageID)) {
-								publicMessageID = keepSessionResponse.getNewPublicMessage().split("|")[0];
+							String newPublicMessage = keepSessionResponse.getNewPublicMessage();
+							if (newPublicMessage != null && !"".equals(newPublicMessage) && (publicMessageID == null || !newPublicMessage.startsWith(publicMessageID))) {
+								String[] strs = newPublicMessage.split("\\|");
+								publicMessageID = strs[0];
 								System.out.println("你有新的公共消息...");
-								System.out.println(keepSessionResponse.getNewPublicMessage());
+								System.out.println(newPublicMessage);
 								if (onNewPublicMessageReceivedListener != null) {
-									onNewPublicMessageReceivedListener.onMessageReceived(keepSessionResponse.getNewPublicMessage().split("|")[keepSessionResponse.getNewPublicMessage().length() - 1]);
+									onNewPublicMessageReceivedListener.onMessageReceived(strs[strs.length - 1]);
 								}
 							}
-							if (keepSessionResponse.getNewUserMessage() != null && !"".equals(keepSessionResponse.getNewUserMessage()) && !keepSessionResponse.getNewUserMessage().startsWith(userMessageID)) {
-								userMessageID = keepSessionResponse.getNewUserMessage().split("|")[0];
+							String newUserMessage = keepSessionResponse.getNewUserMessage();
+							if (newUserMessage != null && !"".equals(newUserMessage) && (userMessageID == null || !newUserMessage.startsWith(userMessageID))) {
+								String[] strs = newUserMessage.split("\\|");
+								userMessageID = strs[0];
 								System.out.println("你有新的用户消息...");
-								System.out.println(keepSessionResponse.getNewUserMessage());
+								System.out.println(newUserMessage);
 								if (onNewUserMessageReceivedListener != null) {
-									onNewUserMessageReceivedListener.onMessageReceived(keepSessionResponse.getNewUserMessage().split("|")[keepSessionResponse.getNewUserMessage().length() - 1]);
+									onNewUserMessageReceivedListener.onMessageReceived(strs[strs.length - 1]);
 								}
 							}
 						}else
