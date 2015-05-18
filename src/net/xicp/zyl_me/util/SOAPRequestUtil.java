@@ -14,7 +14,7 @@ import net.xicp.zyl_me.exception.CannotConnectToServerException;
 
 public class SOAPRequestUtil {
 	public enum RequestAction {
-		login, keepSession, logout
+		login, keepSession, logout, messageReadOK
 	}
 
 	public static Response request(RequestAction action, String message) throws CannotConnectToServerException {
@@ -35,6 +35,9 @@ public class SOAPRequestUtil {
 				break;
 			case logout:
 				connection.setRequestProperty("SOAPAction", "http://tempuri.org/Logout");
+				break;
+			case messageReadOK:
+				connection.setRequestProperty("SOAPAction", "http://tempuri.org/MessageReadOK");
 				break;
 			default:
 				throw new RuntimeException("Çë´«ÈërequestAction!");
