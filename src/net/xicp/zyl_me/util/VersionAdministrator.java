@@ -9,7 +9,7 @@ import java.util.Properties;
 
 
 public class VersionAdministrator {
-	public static int version = 2;
+	public static int version = 4;
 	public VersionInfomation detectVersion()
 	{
 		String download = "http://zyl-me.xicp.net:1234/nsuaaac/nsuaaac.jar";

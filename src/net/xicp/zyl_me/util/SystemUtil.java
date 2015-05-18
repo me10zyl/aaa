@@ -30,7 +30,12 @@ public class SystemUtil {
 			while (addresses.hasMoreElements()) {
 				InetAddress address = addresses.nextElement();
 				if (address instanceof Inet4Address && !address.getHostAddress().equals("127.0.0.1"))
-					arr.add(address);
+				{
+					if(!networkinterface.getDisplayName().contains("WiFi")) //avoid send wifi ip
+					{
+						arr.add(address);
+					}
+				}
 			}
 		}
 		return arr;
