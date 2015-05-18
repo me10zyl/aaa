@@ -337,6 +337,10 @@ public class MainUI {
 			public void windowClosing(WindowEvent e) {
 				// TODO Auto-generated method stub
 				Saver.saveCheckboxStatus("savePasswordCheckBox", savePasswordCheckBox.isSelected());
+				String userPW2 = new String(userPWField.getPassword()); 
+				if (savePasswordCheckBox.isSelected() && !"".equals(userPW2) && savePasswordCheckBox.isSelected()) {
+					Saver.saveUserPW(userPW2);
+				}
 				super.windowClosing(e);
 			}
 			
