@@ -79,7 +79,7 @@ public class MainUI {
 	private String userPW = "";
 	private String userIP = "169.254.92.24,10.97.34.26,192.168.160.1,192.168.242.1";
 	private String errInfo = "ED3B41FAD0157C3D8EBCB395426C52E5";
-	private String computerName = "ACCELERATEDWORL";
+	private String computerName = "Administrator";
 	private String mac = "6002B4E55A37,C45444AB85DE,005056C00001,005056C00008";
 	private String isAutoLogin = "false";
 	private String clientVersion = "1.14.10.16";
@@ -138,7 +138,8 @@ public class MainUI {
 
 	private void clientWorking() {
 		try {
-			computerName = SystemUtil.getComputerName();
+			if (SystemUtil.getComputerName() != null)
+				computerName = SystemUtil.getComputerName();
 			userIP = SystemUtil.getIPAddress();
 			mac = SystemUtil.getMACAddress();
 			userID = userIDTextField.getText();
@@ -288,22 +289,17 @@ public class MainUI {
 		frame.setLocationRelativeTo(null);
 		savePasswordCheckBox.setSelected(Saver.getCheckboxStatus("savePasswordCheckBox"));
 		userIDTextField.setText(Saver.getUserID());
-		
 		JMenuBar menuBar = new JMenuBar();
 		frame.setJMenuBar(menuBar);
-		
 		JMenu menu = new JMenu("\u529F\u80FD");
 		menuBar.add(menu);
-		
 		menu_1 = new JMenu("\u5B9A\u65F6\u5173\u673A");
 		menu.add(menu_1);
-		
 		menuItem_1 = new JMenuItem("\u5F00\u542F");
 		menuItem_1.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				String res = (String) JOptionPane.showInputDialog(frame, "请输入关机时间(默认11点关机 格式HH:mm):", "定时关机器", JOptionPane.OK_CANCEL_OPTION,null,null,"23:00");
-				if(res != null)
-				{
+				String res = (String) JOptionPane.showInputDialog(frame, "请输入关机时间(默认11点关机 格式HH:mm):", "定时关机器", JOptionPane.OK_CANCEL_OPTION, null, null, "23:00");
+				if (res != null) {
 					try {
 						ExternalTools.shutdownAtTime(res);
 					} catch (IOException | ParseException e1) {
@@ -315,7 +311,6 @@ public class MainUI {
 			}
 		});
 		menu_1.add(menuItem_1);
-		
 		menuItem_2 = new JMenuItem("\u5173\u95ED");
 		menuItem_2.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -337,32 +332,27 @@ public class MainUI {
 			public void windowClosing(WindowEvent e) {
 				// TODO Auto-generated method stub
 				Saver.saveCheckboxStatus("savePasswordCheckBox", savePasswordCheckBox.isSelected());
-				String userPW2 = new String(userPWField.getPassword()); 
+				String userPW2 = new String(userPWField.getPassword());
 				if (savePasswordCheckBox.isSelected() && !"".equals(userPW2) && savePasswordCheckBox.isSelected()) {
 					Saver.saveUserPW(userPW2);
 				}
 				super.windowClosing(e);
 			}
-			
+
 			@Override
 			public void windowIconified(WindowEvent e) {
 				// TODO Auto-generated method stub
 				super.windowIconified(e);
-				if("login".equals(client.getLoginStatus()))
-				{
+				if ("login".equals(client.getLoginStatus()) && SystemTray.isSupported()) {
 					frame.setVisible(false);
-					if(isTheFirstTimeToOpen)
-					{
-						trayicon.displayMessage("NSUAAAC - Version"+VersionAdministrator.version, "me10zyl@qq.com", MessageType.INFO);
+					if (isTheFirstTimeToOpen) {
+						trayicon.displayMessage("NSUAAAC - Version" + VersionAdministrator.version, "me10zyl@qq.com", MessageType.INFO);
 						isTheFirstTimeToOpen = false;
 					}
 				}
 			}
-			
 		});
-		if (!SystemTray.isSupported()) {
-			return;
-		} else {
+		if (SystemTray.isSupported()) {
 			SystemTray systemTray = SystemTray.getSystemTray();
 			String title = "NSUAAAC - me10zyl@qq.com";
 			Image image = Toolkit.getDefaultToolkit().getImage(MainUI.class.getResource("/images/trayIcon.png"));

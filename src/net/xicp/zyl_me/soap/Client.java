@@ -58,7 +58,7 @@ public class Client {
 	private String userPW = "";
 	private String userIP = "";
 	private String errInfo = "ED3B41FAD0157C3D8EBCB395426C52E5";
-	private String computerName = "ACCELERATEDWORL";
+	private String computerName = "Administrator";
 	private String mac = "";
 	private String isAutoLogin = "false";
 	private String clientVersion = "1.14.10.16";
