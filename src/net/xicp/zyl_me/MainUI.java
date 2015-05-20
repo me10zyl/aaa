@@ -53,6 +53,7 @@ import net.xicp.zyl_me.exception.IDPWWrongException;
 import net.xicp.zyl_me.exception.LogoutFailedException;
 import net.xicp.zyl_me.soap.Client;
 import net.xicp.zyl_me.soap.Client.OnErrorListener;
+import net.xicp.zyl_me.soap.Client.OnLoginPublicMessageReceivedListener;
 import net.xicp.zyl_me.soap.Client.OnLogoutSuccessListener;
 import net.xicp.zyl_me.soap.Client.OnNewPublicMessageReceivedListener;
 import net.xicp.zyl_me.soap.Client.OnNewUserMessageReceivedListener;
@@ -153,6 +154,14 @@ public class MainUI {
 			client.setUserID(userID);
 			client.setUserIP(userIP);
 			client.setUserPW(userPW);
+			client.setOnLoginPublicMessageReceivedListener(new OnLoginPublicMessageReceivedListener() {
+				@Override
+				public void onMessageReceived(String message) {
+					// TODO Auto-generated method stub
+					JOptionPane.showMessageDialog(frame, message);
+					System.out.println(message);
+				}
+			});
 			client.setOnNewPublicMessageReceivedListener(new OnNewPublicMessageReceivedListener() {
 				@Override
 				public void onMessageReceived(String message) {

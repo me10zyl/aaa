@@ -71,9 +71,12 @@ public class Login {
 		Map<String, String> maps = new HashMap();
 		Element root = responseDocument.getRootElement();
 		Element loginResult = root.element("Body").element("LoginResponse").element("LoginResult");
+		Element loginPublicMessage = null;
 		for (Iterator<Element> it = loginResult.elementIterator(); it.hasNext();) {
 			Element element = (Element) it.next();
 			maps.put(element.getName(), element.getText());
+			if(element.getName().equals("LoginPublicMessage"))
+				loginPublicMessage = element;
 		}
 		loginResponse.setName((String) maps.get("Name"));
 		loginResponse.setNetGroup((String) maps.get("NetGroup"));
@@ -86,6 +89,12 @@ public class Login {
 		loginResponse.setIsIPInvalid((String) maps.get("IsIPInvalid"));
 		loginResponse.setIsDisable((String) maps.get("IsDisable"));
 		loginResponse.setPublicMessageID((String) maps.get("PublicMessageID"));
+		if(loginPublicMessage != null)
+		{
+			Element stringElement = loginPublicMessage.element("string");
+			if(stringElement != null)
+				loginResponse.setLoginPublicMessage(stringElement.getText());
+		}
 		loginResponse.setResponse(response);
 		return loginResponse;
 	}

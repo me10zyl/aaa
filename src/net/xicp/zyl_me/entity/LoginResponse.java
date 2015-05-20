@@ -13,12 +13,21 @@ public class LoginResponse {
 	private String IsIPInvalid;
 	private String IsDisable;
 	private String PublicMessageID;
+	private String LoginPublicMessage;
+
+	public String getLoginPublicMessage() {
+		return LoginPublicMessage;
+	}
+
+	public void setLoginPublicMessage(String loginPublicMessage) {
+		LoginPublicMessage = loginPublicMessage;
+	}
 
 	public LoginResponse() {
 		// TODO Auto-generated constructor stub
 	}
 
-	public LoginResponse(String netGroup, String expireTime, String name, String token, String isLogin, String isExpire, String isIDPWWrong, String isNeedUpdate, String isIPInvalid, String isDisable, String publicMessageID, Response response) {
+	public LoginResponse(String netGroup, String expireTime, String name, String token, String isLogin, String isExpire, String isIDPWWrong, String isNeedUpdate, String isIPInvalid, String isDisable, String publicMessageID, String loginPublicMessage, Response response) {
 		this.NetGroup = netGroup;
 		this.ExpireTime = expireTime;
 		this.Name = name;
@@ -30,6 +39,7 @@ public class LoginResponse {
 		this.IsIPInvalid = isIPInvalid;
 		this.IsDisable = isDisable;
 		this.PublicMessageID = publicMessageID;
+		this.LoginPublicMessage = loginPublicMessage;
 		this.response = response;
 	}
 
