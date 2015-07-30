@@ -9,14 +9,14 @@ import java.util.Properties;
 
 
 public class VersionAdministrator {
-	public static int version = 9;
+	public static int version = 10;
 	public VersionInfomation detectVersion()
 	{
-		String download = "http://zyl-me.xicp.net:1234/nsuaaac/nsuaaac.jar";
+		String download = "http://112.74.98.30:8080/nsuaaac/nsuaaac.jar";
 		String message = "";
 		int version = 0;
 		try {
-			URL url = new URL("http://zyl-me.xicp.net:1234/nsuaaac/version");
+			URL url = new URL("http://112.74.98.30:8080/nsuaaac/version");
 			HttpURLConnection connection = (HttpURLConnection) url.openConnection();
 			connection.setConnectTimeout(5000);
 			InputStream is = connection.getInputStream();

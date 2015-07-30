@@ -19,6 +19,15 @@ public class SystemUtil {
 		return addressesStr.substring(0, addressesStr.length() - 1);
 	}
 	
+	public static String getWiFiIPAddressStr() throws UnknownHostException, SocketException {
+		String addressesStr = "";
+		for(InetAddress address : getWiFiIPAddress())
+		{
+			addressesStr += address.getHostAddress() + ",";
+		}
+		return addressesStr.substring(0, addressesStr.length() - 1);
+	}
+	
 	private static ArrayList<InetAddress> getIPAddress_() throws SocketException
 	{
 		ArrayList<InetAddress> arr = new ArrayList<InetAddress>();
@@ -32,6 +41,28 @@ public class SystemUtil {
 				if (address instanceof Inet4Address && !address.getHostAddress().equals("127.0.0.1"))
 				{
 					if(!networkinterface.getDisplayName().contains("WiFi")) //avoid send wifi ip
+					{
+						arr.add(address);
+					}
+				}
+			}
+		}
+		return arr;
+	}
+	
+	public static ArrayList<InetAddress> getWiFiIPAddress() throws SocketException
+	{
+		ArrayList<InetAddress> arr = new ArrayList<InetAddress>();
+		Enumeration<NetworkInterface> networkInterfaces = NetworkInterface.getNetworkInterfaces();
+		Enumeration<InetAddress> addresses;
+		while (networkInterfaces.hasMoreElements()) {
+			NetworkInterface networkinterface = networkInterfaces.nextElement();
+			addresses = networkinterface.getInetAddresses();
+			while (addresses.hasMoreElements()) {
+				InetAddress address = addresses.nextElement();
+				if (address instanceof Inet4Address && !address.getHostAddress().equals("127.0.0.1"))
+				{
+					if(networkinterface.getDisplayName().contains("WiFi")) //avoid send wifi ip
 					{
 						arr.add(address);
 					}

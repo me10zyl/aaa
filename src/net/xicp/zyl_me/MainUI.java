@@ -3,6 +3,7 @@ package net.xicp.zyl_me;
 import java.awt.AWTException;
 import java.awt.Desktop;
 import java.awt.EventQueue;
+import java.awt.HeadlessException;
 import java.awt.Image;
 import java.awt.MenuItem;
 import java.awt.PopupMenu;
@@ -15,7 +16,6 @@ import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.net.SocketException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -25,6 +25,7 @@ import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.text.ParseException;
+import java.util.ArrayList;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -33,9 +34,13 @@ import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
+import javax.swing.JDialog;
 import javax.swing.JEditorPane;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPasswordField;
@@ -51,12 +56,16 @@ import net.xicp.zyl_me.exception.ExpireException;
 import net.xicp.zyl_me.exception.HTTPNotOKException;
 import net.xicp.zyl_me.exception.IDPWWrongException;
 import net.xicp.zyl_me.exception.LogoutFailedException;
+import net.xicp.zyl_me.server.Server;
+import net.xicp.zyl_me.server.Server.OnReconnectListener;
 import net.xicp.zyl_me.soap.Client;
 import net.xicp.zyl_me.soap.Client.OnErrorListener;
 import net.xicp.zyl_me.soap.Client.OnLoginPublicMessageReceivedListener;
 import net.xicp.zyl_me.soap.Client.OnLogoutSuccessListener;
 import net.xicp.zyl_me.soap.Client.OnNewPublicMessageReceivedListener;
 import net.xicp.zyl_me.soap.Client.OnNewUserMessageReceivedListener;
+import net.xicp.zyl_me.ui.AAAMessageDialog;
+import net.xicp.zyl_me.ui.AlertDialog;
 import net.xicp.zyl_me.util.ExternalTools;
 import net.xicp.zyl_me.util.Saver;
 import net.xicp.zyl_me.util.SystemUtil;
@@ -64,10 +73,6 @@ import net.xicp.zyl_me.util.VersionAdministrator;
 import net.xicp.zyl_me.util.VersionInfomation;
 
 import org.dom4j.DocumentException;
-
-import javax.swing.JMenuBar;
-import javax.swing.JMenu;
-import javax.swing.JMenuItem;
 
 public class MainUI {
 	private boolean isTheFirstTimeToOpen = true;
@@ -87,12 +92,13 @@ public class MainUI {
 	private String osVersion = "Microsoft Windows NT 6.1.7601 Service Pack 1";
 	private JButton loginBtn;
 	private JEditorPane noticeEditorPane;
-	private Client client;
+	public static Client client;
 	private JCheckBox savePasswordCheckBox;
 	private JMenu menu_1;
 	private JMenuItem menuItem_1;
 	private JMenuItem menuItem_2;
-
+	private Server server;
+	public static ArrayList<JDialog> dialogs = new ArrayList<JDialog>();
 	/**
 	 * Launch the application.
 	 */
@@ -158,7 +164,9 @@ public class MainUI {
 				@Override
 				public void onMessageReceived(String message) {
 					// TODO Auto-generated method stub
-					JOptionPane.showMessageDialog(frame, message);
+					AAAMessageDialog dialog = new AAAMessageDialog(frame);
+					dialogs.add(dialog);
+					dialog.getTextArea().setText(message);
 					System.out.println(message);
 				}
 			});
@@ -166,7 +174,9 @@ public class MainUI {
 				@Override
 				public void onMessageReceived(String message) {
 					// TODO Auto-generated method stub
-					JOptionPane.showMessageDialog(frame, message);
+					AAAMessageDialog dialog = new AAAMessageDialog(frame);
+					dialogs.add(dialog);
+					dialog.getTextArea().setText(message);
 					System.out.println(message);
 				}
 			});
@@ -174,7 +184,9 @@ public class MainUI {
 				@Override
 				public void onMessageReceived(String message) {
 					// TODO Auto-generated method stub
-					JOptionPane.showMessageDialog(frame, message);
+					AAAMessageDialog dialog = new AAAMessageDialog(frame);
+					dialogs.add(dialog);
+					dialog.getTextArea().setText(message);
 					System.out.println(message);
 				}
 			});
@@ -182,7 +194,9 @@ public class MainUI {
 				@Override
 				public void onError(String message) {
 					// TODO Auto-generated method stub
-					JOptionPane.showMessageDialog(frame, message);
+					AlertDialog dialog = new AlertDialog(frame);
+					dialogs.add(dialog);
+					dialog.getLblNewLabel().setText(message);
 					client.cancelKeepSession("error");
 					detectLoginStatus();
 				}
@@ -215,7 +229,9 @@ public class MainUI {
 		} catch (InvalidKeyException | NoSuchAlgorithmException | InvalidKeySpecException | InvalidAlgorithmParameterException | NoSuchPaddingException | IllegalBlockSizeException | BadPaddingException | DocumentException | IOException | IDPWWrongException | ExpireException | HTTPNotOKException | DisableException | CannotConnectToServerException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-			JOptionPane.showMessageDialog(frame, e.getMessage());
+			AlertDialog dialog = new AlertDialog(frame);
+			dialogs.add(dialog);
+			dialog.getLblNewLabel().setText(e.getMessage());
 			client.cancelKeepSession("error");
 			detectLoginStatus();
 		}
@@ -230,6 +246,7 @@ public class MainUI {
 				noticeEditorPane.setText("");
 			}
 		}
+		server.printMessage("loginStatus="+client.getLoginStatus());
 	}
 
 	/**
@@ -271,20 +288,7 @@ public class MainUI {
 		loginBtn = new JButton("\u767B\u5F55");
 		loginBtn.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				if ("login".equals(client.getLoginStatus()))// 注销
-				{
-					try {
-						noticeEditorPane.setText(client.logout());
-					} catch (NoSuchAlgorithmException | DocumentException | IOException | HTTPNotOKException | LogoutFailedException | CannotConnectToServerException e1) {
-						// TODO Auto-generated catch block
-						e1.printStackTrace();
-						JOptionPane.showMessageDialog(frame, e1.getMessage());
-						client.cancelKeepSession("loginout-failed");
-					}
-				} else {
-					clientWorking();
-				}
-				detectLoginStatus();
+				login();
 			}
 		});
 		loginBtn.setBounds(136, 146, 113, 27);
@@ -314,7 +318,9 @@ public class MainUI {
 					} catch (IOException | ParseException e1) {
 						// TODO Auto-generated catch block
 						e1.printStackTrace();
-						JOptionPane.showMessageDialog(frame, e1.getMessage());
+						AlertDialog dialog = new AlertDialog(frame);
+						dialogs.add(dialog);
+						dialog.getLblNewLabel().setText(e1.getMessage());
 					}
 				}
 			}
@@ -328,11 +334,27 @@ public class MainUI {
 				} catch (IOException e1) {
 					// TODO Auto-generated catch block
 					e1.printStackTrace();
-					JOptionPane.showMessageDialog(frame, e1.getMessage());
+					AlertDialog dialog = new AlertDialog(frame);
+					dialogs.add(dialog);
+					dialog.getLblNewLabel().setText(e1.getMessage());
 				}
 			}
 		});
 		menu_1.add(menuItem_2);
+		
+		JMenuItem mntmwifiIp = new JMenuItem("\u67E5\u770BIP");
+		mntmwifiIp.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				try {
+					JOptionPane.showMessageDialog(frame,SystemUtil.getWiFiIPAddressStr(),"请确保WiFi已开启再查询IP",JOptionPane.DEFAULT_OPTION);
+				} catch (HeadlessException | UnknownHostException | SocketException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+					JOptionPane.showMessageDialog(frame, e1.getMessage());
+				}
+			}
+		});
+		menu.add(mntmwifiIp);
 		if (!"".equals(Saver.getUserID()) && Saver.getUserID() != null && savePasswordCheckBox.isSelected()) {
 			userPWField.setText(Saver.getUserPW());
 		}
@@ -380,6 +402,16 @@ public class MainUI {
 				e1.printStackTrace();
 			}
 		}
+		
+		server = new Server();
+		server.create();
+		server.setOnReconnectListener(new OnReconnectListener() {
+			@Override
+			public void onReconnect() {
+				// TODO Auto-generated method stub
+				login();
+			}
+		});
 	}
 
 	private PopupMenu createMenu() {
@@ -405,5 +437,25 @@ public class MainUI {
 		menu.addSeparator();
 		menu.add(exit);
 		return menu;
+	}
+
+	private void login() {
+		if ("login".equals(client.getLoginStatus()))// 注销
+		{
+			try {
+				noticeEditorPane.setText(client.logout());
+			} catch (NoSuchAlgorithmException | DocumentException | IOException | HTTPNotOKException | LogoutFailedException | CannotConnectToServerException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+				AlertDialog dialog = new AlertDialog(frame);
+				dialogs.add(dialog);
+				dialog.getLblNewLabel().setText(e1.getMessage());
+//				JOptionPane.showMessageDialog(frame, e1.getMessage());
+				client.cancelKeepSession("loginout-failed");
+			}
+		} else {
+			clientWorking();
+		}
+		detectLoginStatus();
 	}
 }
